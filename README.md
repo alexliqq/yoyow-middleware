@@ -1,139 +1,140 @@
 # yoyow-middleware
 
-使用YOYOW 中间件是平台接入最简单的方式。主要提供三方面的接口： 账号授权，平台激励和内容上链。 可以采用 Docker 一键部署，获得相应的 API，方便的与 YOYOW 链进行交互。
+Using YOYOW middleware is the easiest way to access the platform. It mainly provides three interfaces: account authorization, platform incentives and content chaining. You can use Docker one-click deployment to get the corresponding API to easily interact with the YOYOW blockchain.
 
-YOYOW中间件是通过YOYOW node 的API接口与YOYOW网络通讯，为平台服务商提供方便的访问链上数据的接口，保证传统业务代码能在只做尽量少的改动情况下，也能达到上链的要求。具体示意图如下：
-![YOYOW 中间件作用示意图](https://github.com/yoyow-org/yoyow-middleware/blob/master/public/images/architecture.png)
+YOYOW middleware communicates with YOYOW network through the API interface of YOYOW node, which provides platform service providers with convenient interfaces to access the data on the chain, ensuring that traditional business codes can reach the requirements of getting on chain with only minimal changes. The specific diagram is as follow:
 
-平台的创建操作步骤请参考：[从0开始创建YOYOW平台账户](https://wiki.yoyow.org/zh/latest/others/create_platform.html)
+![YOYOW Middleware Function Diagram](https://github.com/yoyow-org/yoyow-middleware/blob/master/public/images/architecture.png)
 
-## 部署启动
+For the creation steps of the platform, please refer to: [Create a YOYOW platform account from 0](https://wiki.yoyow.org/en/latest/others/create_platform.html)
 
-### 配置文件说明
+## Deployment Start
 
-配置文件的路径在代码路径下`conf/config.js` 文件中，如果使用docker的方式启动，可以将配置文件映射到容器中`/app/conf`路径下
+### Configuration File Description
+
+The path to the configuration file is in the `conf/config.js` file in the code path. If you start it in docker mode, you can map the configuration file to the path `/app/conf` in the container.
 
 ```javascript
 {
-    // api服务器地址，测试网公共api地址如下，正式网部署请更改该地址,例如正式网公共的api地址：wss://api-bj.yoyow.org/ws
+    // The api server address, the Testnet public api address are as follows. For the official network deployment, please change the address. For example, the official network public api address：wss://api-bj.yoyow.org/ws
     apiServer: "wss://api.testnet.yoyow.org",
 
-    // 安全请求有效时间，单位s，如果请求的内容超过有效期，会返回 1003 请求已过期
+    // The validity time of the security request, in unit "s", if the requested content exceeds the validity period, it will return "The request 1003 has expired".
     secure_ageing: 60,
 
-    // 平台安全请求验证key 可以自行定义，具体使用见《安全访问》
+    // The platform security request verification key can be customized. For details, see "Security Access"
     secure_key: "",
 
-    // 平台所有者资金私钥
+    // Platform owner active key
     active_key: "",
 
-    // 平台所有者零钱私钥
+    // Platform owner secondary key
     secondary_key: "",
 
-    // 平台所有者备注私钥
+    // Platform owner memo key
     memo_key: "",
 
-    // 平台id(yoyow id)
+    // Platform id(yoyow id)
     platform_id: "",
 
-    // 操作手续费是否使用积分
+    // Whether use points to pay fees
     use_csaf: true,
 
-    // 转账是否转到余额 否则转到零钱
+    // Whether transfer to the balance, otherwise it is transferred to tippings
     to_balance: false,
 
-    // 钱包授权页URL，测试网地址如下，正式网地址“https://wallet.yoyow.org/#/authorize-service”
+    // Wallet authorization page URL, Testnet address are as follows, official network address“https://wallet.yoyow.org/#/authorize-service”
     wallet_url: "http://demo.yoyow.org:8000/#/authorize-service"
 }
 ```
-需要注意的是：
+Notes:
 
-1. 在一般使用场景中，中间件值最多需要动用零钱私钥和备注私钥，只配置零钱私钥和备注私钥可以满足大部分需求。除非你确定需要使用资金私钥，否则不要将资金私钥写进配置文件。
-2. 中间件中使用了加密请求(`secure_key`)来保证安全性，不过依然强烈建议内网部署，做好隔离，也需要保证私钥的安全性。
-3. 操作手续费建议使用积分抵扣，如果抵扣失败，会直接报错，不会自动扣除零钱作为手续费
+1. In the general usage scenario, the middleware value needs to use the secondary key and the memo key at most, and the secondary key and the memo key can satisfy most of the requirements. Do not write the active key into the configuration file unless you are sure you need to use the active key.
+2. Encryption requests (`secure_key`) are used in the middleware to ensure security. However, it is strongly recommended to deploy the internal network, isolate it, and ensure the security of the private key.
+3. It is recommended to use the point deduction for the handling fees. If the deduction fails, it will directly report the error and will not automatically deduct the tippings as the handling fees.
 
-### Docker 一键部署
+### Docker One-click Deployment
 
 ```bash
-docker run -itd --name yoyow-middleware -v <本地配置文件路径>:/app/conf -p 3001:3001 yoyoworg/yoyow-middleware
+docker run -itd --name yoyow-middleware -v <local configuration file path>:/app/conf -p 3001:3001 yoyoworg/yoyow-middleware
 ```
 
-### 手动部署
+### Manual Deployment
 
-1. clone 源码
+1. Clone source code
     `git clone https://github.com/yoyow-org/yoyow-middleware.git`
-2. 修改中间件配置 
-    参照配置文件说明()，修改文件`yoyow-middleware/conf/config.js`
-3. 安装中间件服务所需node库
-    进入 `~/yoyow-middleware/` 目录
+2. Modify middleware configuration
+    Modify the file by referring to the configuration file description ()`yoyow-middleware/conf/config.js`
+3. Install the node library required by the middleware service
+    Enter `~/yoyow-middleware/` directory
     `npm install`
-4. 启动中间件服务
+4. Start middleware service
     `npm start`
 
-启动正常情况如下图
-![启动正常情况如图](https://github.com/yoyow-org/yoyow-middleware/blob/master/public/images/step4.png)
+Start normal state as shown below
+![Start normal state as shown](https://github.com/yoyow-org/yoyow-middleware/blob/master/public/images/step4.png)
 
-## V2 接口说明
+## V2 Interface Description
 
-### 请求文档及示例
+### Request documents and examples
 
-#### 1. 基础查询接口
+#### 1. Basic query interface
 
-##### 1.1. 获取指定账户信息 /accounts
+##### 1.1. Get the specified account information /accounts
 
-  请求类型：GET
+  Request type：GET
 
-  请求路径：/accounts/:uid
+  Request path：/accounts/:uid
   
-    {Number} uid - 账号id
+    {Number} uid - account id
 
-  请求参数：
+  Request parameter：
 
-    无
+    Null
 
-  请求示例：
+  Request example：
 
     localhost:3000/api/v2/accounts/30833
 
-  返回结果：
+  Returned result：
 ```
     {
-      code: 操作结果,
-      message: 返回消息,
-      data: { // 用户信息
-        id: 账号Object Id
-        uid: 账号uid
-        name: 账号名称
-        owner: 主控权限
-        active: 资金权限
-        secondary: 零钱权限
-        memo_key: 备注密钥公钥
-        reg_info: 注册信息
-        can_post: 是否可发帖
-        can_reply: 是否可回帖
-        can_rate: 是否可评价
-        is_full_member: 是否会员
-        is_registrar: 是否注册商
-        is_admin: 是否管理员
-        statistics: { //用户YOYO资产详情
-          obj_id: 资产对象id
-          core_balance: 余额
-          prepaid: 零钱
-          csaf: 积分
-          total_witness_pledge: 见证人总抵押（用户创建见证人抵押数量）
-          total_committee_member_pledge: 理事会总抵押（用户创建理事会成员抵押数量）
-          total_platform_pledge: 平台总抵押（用户创建平台抵押数量）
-          releasing_witness_pledge: 见证人抵押待退回
-          releasing_committee_member_pledge: 理事会抵押待退回
-          releasing_platform_pledge: 平台抵押待退回
+      code: operation result,
+      message: return message,
+      data: { // user information
+        id: account Object Id
+        uid: account uid
+        name: account name
+        owner: owner authority
+        active: active authority
+        secondary: secondary authority
+        memo_key: memo key
+        reg_info: registration information
+        can_post: whether can post
+        can_reply: whehter can reply
+        can_rate: whether can rate
+        is_full_member: is full member or not
+        is_registrar: is registrar or not
+        is_admin: is administrator or not
+        statistics: { //Users' YOYO asset details
+          obj_id: asset object id
+          core_balance: balance
+          prepaid: tippings
+          csaf: points
+          total_witness_pledge: total witness pledge (pledge amount by users for creating witnesses)
+          total_committee_member_pledge: total committee pledge（pledge amount by users for creating committees）
+          total_platform_pledge: total platform pledge（pledge amount by users for creating platforms）
+          releasing_witness_pledge: witness pledge to be returned
+          releasing_committee_member_pledge: committee pledge to be returned
+          releasing_platform_pledge: platform pledge to be returned
         }
-        assets: [ //用户拥有的所有资产
+        assets: [ //All assets owned by the users
             {
-                amount: 资产数量,
-                asset_id: 资产id,
-                precision: 资产精度,
-                symbol: 资产符号,
-                description: 资产描述"
+                amount: asset amount,
+                asset_id: asset id,
+                precision: asset precision,
+                symbol: asset symbol,
+                description: asset description"
             }
             ...
         ]
@@ -141,142 +142,140 @@ docker run -itd --name yoyow-middleware -v <本地配置文件路径>:/app/conf 
     }
 ```
 
-##### 1.2. 获取指定账户近期活动记录 /accounts/:uid/histories
+##### 1.2. Get the recent activity history of the specified account /accounts/:uid/histories
 
-  请求类型：GET
+  Request type：GET
 
-  请求路径：/accounts/:uid/histories
+  Request path：/accounts/:uid/histories
 
-    {Number} uid - 账号id
+    {Number} uid - account id
 
-  请求参数：
+  Request parameters：
     
-    {Number} op_type - 查询op类型 '0' 为 转账op，默认为null 即查询所有OP类型
-    {Number} start 查询开始编号，为0时则从最新记录开始查询，默认为0
-    {Number} limit - 查询长度，最大不可超过100条，默认为10
+    {Number} op_type - Query op type, '0' for transfer op, default is null, query all OP types
+    {Number} start - Query start number. When it is 0, the query starts from the latest record. The default is 0.
+    {Number} limit - Query the length. The length of the query cannot exceed 100. The default is 10.
 
-  请求示例：
+  Request example：
 
   `localhost:3000/api/v2/accounts/30833/histories?start=0&limit=2&op_type=0`
 
-  返回结果：
+  Returned results：
 ```
     {
-      code: 操作结果,
-      message: 返回消息,
-      data: [] 历史记录对象数组
+      code: operation result,
+      message: return message,
+      data: [] Array of history objects
     }
 ```
 
-##### 1.3. 查询账户授予平台的权限
+##### 1.3. Query the permissions granted to the platform by the account
 
-  请求类型：GET
+  Request type：GET
 
-  请求路径：/authPermissions
+  Request path：/authPermissions
 
-  请求参数：
+  Request parameters：
 
-    {Number} platform - 平台账户
-    {Number} account - 起始查询账户
+    {Number} platform - platform accounts
+    {Number} account - initial query account
 
-  请求示例：
+  Requst example：
 
     localhost:3000/api/v2/authPermissions?platform=33313&account=31479
 
-  返回结果：
+  Returned results：
 
 ```
     {
-      code: 操作结果,
-      message: 返回消息,
+      code: operation results,
+      message: return message,
       data: [
         {
             "id": "2.22.0", 
-            "account": 30833, 账号id
-            "platform": 33313, 平台id
-            "max_limit": 1000000000, 授予平台可使用的最大零钱额度
-            "cur_used": 0,  当前已使用零钱数额
-            "is_active": true,  授权状态，false 则为该授权无效
-            "permission_flags": 255  详细授权权限
+            "account": 30833, account id
+            "platform": 33313, platform id
+            "max_limit": 1000000000, the maximum amount of tippings for the authorized platform
+            "cur_used": 0,  the amount of tippings currently used
+            "is_active": true,  authorization status，false the authorization is invalid
+            "permission_flags": 255  detailed authorization authority
         }
     ]
     }
 ```
 
-##### 1.4. 获取指定资产信息
+##### 1.4. Get the specified asset information
+  Request type：GET
 
-  请求类型：GET
+  Request path：/assets/YOYO
 
-  请求路径：/assets/YOYO
-
-  请求参数：
+  Request parameter：
 
 ```
-{String | Number} search - 资产符号（大写）或 资产id
+{String | Number} search - asset symbol（capital）or asset id
 ```
 
-  请求示例：
+  Request example：
 
 ```
 http://localhost:3001/api/v2/assets/YOYO
 ```
 
-  返回结果：
+  Returned results：
 
 ```
 {
-  code: 操作结果,
-  message: 返回消息,
+  code: operation results,
+  message: returned message,
   data: {
-    "id":"1.3.0", - 资产object id
-    "asset_id":0, - 资产id
-    "symbol":"YOYO", - 资产符号
-    "precision":5, - 资产精度
-    "issuer":1264, - 资产发行者uid
+    "id":"1.3.0", - asset object id
+    "asset_id":0, - asset id
+    "symbol":"YOYO", - asset symbol
+    "precision":5, - asset precision
+    "issuer":1264, - asset issuer uid
     "options":{
-      "max_supply":"200000000000000", - 流通量上限
-      "market_fee_percent":0, - 交易手续费百分比
-      "max_market_fee":"1000000000000000", - 交易手续费最大值
-      "issuer_permissions":0, - 资产可用权限
-      "flags":0, - 资产权限
-      "whitelist_authorities":[], - 资产白名单管理员清单 
-      "blacklist_authorities":[], - 资产黑名单管理员清单
-      "whitelist_markets":[], - 交易对白名单
-      "blacklist_markets":[], - 交易对黑名单
-      "description":"" - 资产描述
+      "max_supply":"200000000000000", - maximum amount of circulation
+      "market_fee_percent":0, - transaction fee percentage
+      "max_market_fee":"1000000000000000", - transaction fee maximum
+      "issuer_permissions":0, - asset available permissions
+      "flags":0, - asset permissions
+      "whitelist_authorities":[], - asset whitelist administrator list 
+      "blacklist_authorities":[], - asset blacklist administrator list
+      "whitelist_markets":[], - transaction pair whitelist
+      "blacklist_markets":[], - transaction pair blacklist
+      "description":"" - asset description
     },
-    "dynamic_asset_data_id":"2.2.0", - 资产动态object id
+    "dynamic_asset_data_id":"2.2.0", - asset dynamics object id
     "dynamic_asset_data":{
-      "id":"2.2.0", - 资产动态object id
+      "id":"2.2.0", - asset dynamics object id
       "asset_id":0,
-      "current_supply":"107384564466939", - 资产当前发行量
+      "current_supply":"107384564466939", - Current circulation of assets
       "accumulated_fees":0
     },
-    "current_supply":"107384564466939",  - 资产当前发行量
+    "current_supply":"107384564466939",  - Current circulation of assets
     "accumulated_fees":0
   }
 }
 
 ```
 
-##### 1.5. 获取块详细信息
+##### 1.5. Get block details
+  Request type：GET
 
-  请求类型：GET
+  Request path：/blocks/:block_num
 
-  请求路径：/blocks/:block_num
+  Request parameter：
 
-  请求参数：
+​ {Number} block_num - Block height (block number)
 
-​ {Number} block_num - 块高度（块号）
-
-  请求示例：
+  Request example：
 
 ```
 http://localhost:3001/api/v2/blocks/100
 
 ```
 
-  返回结果：
+  Returned results：
 
 ```
 {
@@ -285,84 +284,81 @@ http://localhost:3001/api/v2/blocks/100
         "witness": 25997,
         "transaction_merkle_root": "0000000000000000000000000000000000000000",
         "witness_signature": "1f2e29ec9b44ead78ffae6ab8f8e11a5d9beab6064146b21f96f8e43b07eb88c741c87140270bd57ea9efd8fe9327adb53fe2aae5f583c848b87f76648886660c9",
-        "transactions": [], - 块中 包含的所有交易
+        "transactions": [], - All transactions included in the block
         "block_id": "00000064742ada3ddd9efc1c8bf35f28757fa150",
         "signing_key": "YYW587fGuqZXBiXUsoKdwb73RP1WE7AHNgXF5kZ7vSueq7gp6WXGk",
         "transaction_ids": []
     }
 ```
 
-##### 1.6. 获取块状态（是否不可逆）
+##### 1.6. Get block status (whether it is irreversible)
+  Request type：GET
 
-  请求类型：GET
+  Request path：/blocks/:block_num/confirmed
 
-  请求路径：/blocks/:block_num/confirmed
-
-  请求参数：
+  Request parameter：
   
-​ {Number} block_num - 验证的块高度（块号）
+​ {Number} block_num - Verified block height (block number)
 
-  请求示例：
+  Request example：
 ```
 http://localhost:3001/api/v2/blocks/100/confirmed
 ```
 
 
-  返回结果：
+  Returned results：
 ```
     {
-      code: 操作结果,
-      message: 返回消息,
-      data: 此块是否不可退回 
+      code: operation results,
+      message: return message,
+      data: Whether this block is non-returnable 
     }
 ```
 
 
 #### 
 
-#### 2. 文章相关接口
+#### 2. Post related interface
+##### 2.1. Query posts
+  Request type：GET
 
-##### 2.1. 查询文章
+  Request path：/posts
 
-  请求类型：GET
-
-  请求路径：/posts
-
-  请求参数：
-  ​{Number} platform - 平台账户id
-  ​{Number} poster - 发文账户id
- ​ {Number} post_pid - 文章的pid
+  Request parameters：
+  ​{Number} platform - platform account id
+  ​{Number} poster - Poster account id
+ ​ {Number} post_pid - post pid
 
 ```
 localhost:3000/api/v2/posts?poster=30833&post_pid=2&platform=33313
 ```
 
- 返回结果：
+ Returned results：
 
 ```
 {
-  "id": "1.7.1",  - 文章Object id
-  "platform": 33313, - 平台 id
-  "poster": 30833, - 发文账号 id
-  "post_pid": 2, - 文章 pid
-  "origin_poster": 30833, - 转发原文 的 发文账号 id
-  "origin_post_pid": 1, - 转发原文 的 文章pid
-  "origin_platform": 33313, - 转发原文所在的平台账户id
-  "hash_value": "945456321", - 文章hash
-  "extra_data": "coammentextry", - 文章扩展信息
-  "title": "commentname", - 文章标题
-  "body": "commentbody", - 文章正文
-  "create_time": "2019-07-01T13:49:33", - 创建时间
-  "last_update_time": "2019-07-01T13:49:33", - 最后一次修改时间
-  "receiptors": [  - 受益人列表
+  "id": "1.7.1",  - psot Object id
+  "platform": 33313, - platform id
+  "poster": 30833, - poster account id
+  "post_pid": 2, - post pid
+  "origin_poster": 30833, - original post's poster account id
+  "origin_post_pid": 1, - original post's post pid
+  "origin_platform": 33313, - account id of the platform where the original post is located
+  "hash_value": "945456321", - post hash
+  "extra_data": "coammentextry", - post extension information
+  "title": "commentname", - post title
+  "body": "commentbody", - post body
+  "create_time": "2019-07-01T13:49:33", - creation time
+  "last_update_time": "2019-07-01T13:49:33", - last modified time
+  "receiptors": [  - receiptor list
       [
           30833,
           {
-              "cur_ratio": 7500, - 所占受益比例
-              "to_buyout": false, - 是否出售受益比例
-              "buyout_ratio": 0, - 出售受益比例
-              "buyout_price": 0, - 出售价格
-              "buyout_expiration": "1969-12-31T23:59:59" - 出售过期时间
+              "cur_ratio": 7500, - ratio of benefit
+              "to_buyout": false, - Whether to sell the ratio of benefit
+              "buyout_ratio": 0, - sell the ratio of benefit
+              "buyout_price": 0, - sale price
+              "buyout_expiration": "1969-12-31T23:59:59" - sale expiration time
           }
       ],
       [
@@ -376,60 +372,60 @@ localhost:3000/api/v2/posts?poster=30833&post_pid=2&platform=33313
           }
       ]
   ],
-  "license_lid": 1, # 版权license id
-  "permission_flags": 255, # 文章权限
-  "score_settlement": false # 文章是否已经参与过打分收益的分发
+  "license_lid": 1, # copyright license id
+  "permission_flags": 255, # post permission
+  "score_settlement": false # Whether the post has participated in the distribution of rating revenue
 }
 ```
 
 
 
-##### 2.2. 发文章
+##### 2.2. Posting
 
-  请求类型：POST
+  Request type：POST
 
-  请求路径：/posts
+  Request path：/posts
 
-    {Object} cipher - 请求对象密文对象
+    {Object} cipher - Request object ciphertext object
     
     {
-      ct, - 密文文本 16进制
-      iv, - 向量 16进制
-      s   - salt 16进制
+      ct, - Ciphertext hexadecimal
+      iv, - Vector hexadecimal
+      s   - salt hexadecimal
     }
 
-  请求对象结构:
+  Request object structure:
 
-    {Number} platform - 平台账号
-    {Number} poster - 发文人账号
-    {String} title - 文章标题
-    {String} body - 文章内容
-    {String} url - 文章原文的链接（会呈现在链上文章的 extra_data 中）
-    {String} hash_value - hash值，如果不提供该参数，默认使用body内容的sha256值。
-    {Number} origin_platform - 原文平台账号（默认 null）
-    {Number} origin_poster - 原文发文者账号（默认 null）
-    {Number} origin_post_pid - 原文文章编号（默认 null）
-    {Number} time - 操作时间
+    {Number} platform - platform account
+    {Number} poster - poster account
+    {String} title - post title
+    {String} body - post content
+    {String} url - The link to the original text of the post (which will be presented in the extra_data of the post on the chain)
+    {String} hash_value - Hash value, if this parameter is not provided, the sha256 value of the body content is used by default.
+    {Number} origin_platform - original post platform account（default null）
+    {Number} origin_poster - original post poster account（default null）
+    {Number} origin_post_pid - original post number（默认 null）
+    {Number} time - operation time
 
-  请求示例：参照 安全请求验证
+  Request example：Refer to security request verification
 
 ```
 http://localhost:3001/api/v2/posts
 ```
 
-  返回结果：
+  Returned results：
 
 ```
 {
-  "block_num": 858010, - 交易广播时的引用块号
-  "txid": "10fdf2976789fb876c0ca7417abd74a6eecd8564", - 交易 id
-  "post": { - 文章详情
+  "block_num": 858010, - quoted block number in transaction broadcast
+  "txid": "10fdf2976789fb876c0ca7417abd74a6eecd8564", - transaction id
+  "post": { - post details
       "platform": "33313",
       "poster": "30833",
       "post_pid": 6,
       "hash_value": "79f0f1c9f5d2cb0762407dc77b92626bb970c14288c7e789552c7e840bf94b0f",
       "extra_data": "{\"url\":\"https://www.biask.com/\"}",
-      "title": "title:YOYOW发布主网2.0源代码",
+      "title": "title:YOYOW Released the Mainnet 2.0 Source Code",
       "body": "",
       "extensions": {
           "post_type": 0,
@@ -447,397 +443,388 @@ http://localhost:3001/api/v2/posts
 }
 ```
 
-##### 2.3. 为文章打分
+##### 2.3. Rate the post
 
-平台可以使用授权账户的权限，代理账户为文章打分。
+The platform can use the permissions of the authorized account to rate the posts for the users.
 
-  请求类型：POST
+  Request type：POST
 
-  请求路径：/posts/score
+  Request path：/posts/score
 
-  请求参数：
+  Request parameters：
 
 ```
-{Object} cipher - 请求对象密文对象
+{Object} cipher - Request object ciphertext object
 
 {
-  ct, - 密文文本 16进制
-  iv, - 向量 16进制
-  s   - salt 16进制
+  ct, - ciphertext hexadecimal
+  iv, - vector hexadecimal
+  s   - salt hexadecimal
 }
 ```
 
-  请求对象结构:
+  Request object structure:
 
 ```
-    {Number} from_account - 打分的账户
-    {Number} platform - 平台账号
-    {Number} poster - 发文人账号
-    {String} pid - 文章pid
-    {Number} score - 打分 分值，范围是[-5, 5]
-    {Number} csaf - 打分使用的积分数量
-    {Number} time - 操作时间
+    {Number} from_account - rater account
+    {Number} platform - platform account
+    {Number} poster - poster account
+    {String} pid - post pid
+    {Number} score - rate points, the range is [-5, 5]
+    {Number} csaf - number of points used for rating
+    {Number} time - operation time
 ```
 
-  请求示例：参照 安全请求验证
+  Request example: refer to security request verification
 ```
 localhost:3000/api/v2/posts/score
 ```
 
-  返回结果：
+  Returned results：
 
 ```
 {
-  code: 操作结果,
-  message: 返回消息,
+  code: operation results,
+  message: return message,
   data: {
-    block_num: 操作所属块号
-    txid: 操作id
+    block_num: operation block number
+    txid: operation id
   }
 }
 
 ```
 
 
-##### 2.3. 为文章打赏
+##### 2.3. Rewarding posts
+The platform can represent common accounts to reward other posts.
 
-平台可以代理普通账户打赏其他文章。
+The tippings of the account will be used for rewarding and it will also consume the amount of the tippings of the authorized platform.
 
-打赏会动用账户的零钱，也会消耗账户授予授予平台的零钱额度
+  Request type：POST
 
-  请求类型：POST
+  Request path：/posts/reward-proxy
 
-  请求路径：/posts/reward-proxy
-
-  请求参数：
+  Request parameters：
 
 ```
-{Object} cipher - 请求对象密文对象
+{Object} cipher - Request object ciphertext object
 
 {
-  ct, - 密文文本 16进制
-  iv, - 向量 16进制
-  s   - salt 16进制
+  ct, - Ciphertext hexadecimal
+  iv, - Vector hexadecimal
+  s   - salt hexadecimal
 }
 ```
 
-  请求对象结构:
+  Request object structure:
 
 ```
-    {Number} from_account - 打分的账户
-    {Number} platform - 平台账号
-    {Number} poster - 发文人账号
-    {String} pid - 文章pid
-    {Number} amount - 打分 分值，范围是[-5, 5]
-    {Number} csaf - 打分使用的积分数量
-    {Number} time - 操作时间
+    {Number} from_account - rater account
+    {Number} platform - platform account
+    {Number} poster - poster account
+    {String} pid - post pid
+    {Number} amount - rating points, the range is [-5, 5]
+    {Number} csaf - Number of points used for rating
+    {Number} time - operation time
 ```
 
-  请求示例：参照 安全请求验证
+  Request example: refer to security request verification
 ```
 localhost:3000/api/v2/posts/reward-proxy
 ```
 
-  返回结果：
+  Returned results：
 
 ```
 {
-  code: 操作结果,
-  message: 返回消息,
+  code: operation results,
+  message: return message,
   data: {
-    block_num: 操作所属块号
-    txid: 操作id
+    block_num: operation block number
+    txid: operation id
   }
 }
 ```
 
-##### 2.4. 获取文章列表
+##### 2.4. Get post list
 
-  请求类型：GET
+  Request type：GET
 
-  请求路径：/posts/getPostList
+  Request path：/posts/getPostList
 
-  请求参数：
+  Request parameters：
 ```
-{Number} platform - 平台账号
-{Number} poster -发文者账号（默认null，为null时查询该平台所有文章）
-{Number} limit - 加载数（默认20）
-{String} start - 开始时间 'yyyy-MM-ddThh:mm:ss' ISOString （加载下一页时将当前加载出的数据的最后一条的create_time传入，不传则为从头加载）
+{Number} platform - platform account
+{Number} poster -poster account（default is null，query all posts of the platform when it is null）
+{Number} limit - load number（default is 20）
+{String} start - starting time 'yyyy-MM-ddThh:mm:ss' ISOString （When the next page is loaded, the last_create_time of the currently loaded data is passed in. If it is not passed, it is loaded from the beginning.）
 ```
 
 
-  请求示例：
+  Request example：
 
     http://localhost:3001/api/v2/posts/getPostList?start=2019-07-11T07:04:37&limit=2&poster=30834
 
-  返回结果：
+  Returned results：
 
 ```
 {
-  code: 操作结果,
-  message: 返回消息,
-  data: [文章对象（参考获取单个文章返回的数据结构）]
+  code: operation results,
+  message: return message,
+  data: [post object (refer to the returned data structure by getting a single post)]
 }
 ```
 
-##### 2.5 获取某文章的打分列表
+##### 2.5 Get the rating list for a post
+  Request type：GET
 
-  请求类型：GET
+  Request path：/posts/listScores
 
-  请求路径：/posts/listScores
-
-  请求参数：
+  Request parameters：
 
 ```
-{Number} platform - 平台账号
-{Number} poster -发文者账号
-{Number} pid - 文章的pid
-{Number} lower_bound_score - 起始的打分的object id， 默认为 "0.0.0"
-{Number} limit - 返回结果的最大数量
-{Boolean} list_cur_period - 是否只取当前评奖周期的数据，默认为true
+{Number} platform - platform account
+{Number} poster -poster account
+{Number} pid - post pid
+{Number} lower_bound_score - The original rating object id, the default is "0.0.0"
+{Number} limit - The maximum number of results returned
+{Boolean} list_cur_period - Whether to take only the data of the current reward cycle, the default is true
 ```
 
-  请求示例：
+  Request example：
 
     http://localhost:3001/api/v2/posts/listScores?platform=33313&poster=30833&pid=2&lower_bound_score=2.16.3&limit=10&list_cur_period=true
 
-  返回结果：
+  Returned results：
 
 ```
 {
     "code": 0,
-    "data": [ // 打分记录
+    "data": [ // rating history
         {
-            "id": "2.16.3", // 打分的Object id
-            "from_account_uid": 31479, // 打分人
+            "id": "2.16.3", // rating Object id
+            "from_account_uid": 31479, // rater
             "platform": 33313,
             "poster": 30833,
             "post_pid": 2,
             "score": 5,
             "csaf": 23333,
-            "period_sequence": 0,   // 打分所在周期数
-            "profits": 0,  // 打分获得的收益
+            "period_sequence": 0,   // cycle number of the rating
+            "profits": 0,  // income of rating
             "create_time": "2019-07-07T07:40:45"
         }
     ],
-    "message": "操作成功"
+    "message": "successful operation"
 }
 ```
 
-#### 3. @TODO 广告 相关  
+#### 3. @TODO Advertising Related
 
-##### 3.1. @TODO 发布广告位
+##### 3.1. @TODO Publishing an ad slot
+  Request type：POST
 
-  请求类型：POST
+  Request path：/advertising
 
-  请求路径：/advertising
-
-    {Object} cipher - 请求对象密文对象
+    {Object} cipher - Request object ciphertext object
     
     {
-      ct, - 密文文本 16进制
-      iv, - 向量 16进制
-      s   - salt 16进制
+      ct, - Ciphertext hexadecimal
+      iv, - Vector hexadecimal
+      s   - salt hexadecimal
     }
 
-  请求对象结构:
+  Request object structure:
 
-    {Number} platform - 平台账号
-    {String} platform - 广告位描述
-    {Number} unit_price - 单位时间价格
-    {Number} unit_time - 单位时间
+    {Number} platform - platform account
+    {String} platform - Ad slot description
+    {Number} unit_price - Unit time price
+    {Number} unit_time - Unit of time
 
-  请求示例：参照 安全请求验证
+  Request example: refer to security request verification
 
 ```
 http://localhost:3001/api/v2/advertising
 ```
 
-  返回结果：
+  Returned results：
 
 ```
 {
 }
 ```
 
-##### 3.2 @TODO 更新广告位
+##### 3.2 @TODO Update ad slot
+  Request type：PATCH
 
-  请求类型：PATCH
-
-  请求路径：/advertising
-  {Object} cipher - 请求对象密文对象
+  Request path：/advertising
+  {Object} cipher - Request object ciphertext object
   
   {
-    ct, - 密文文本 16进制
-    iv, - 向量 16进制
-    s   - salt 16进制
+    ct, - ciphertext hexadecimal
+    iv, - vector hexadecimal
+    s   - salt hexadecimal
   }
 
-  请求对象结构:
+  Request object structure:
 
 
-    {Number} platform - 平台账号
-    {String} advertising_aid - 广告id
-    {String} description - 广告位描述
-    {Number} unit_price - 单位时间价格
-    {Number} unit_time - 单位时间
-    {Boolean} on_sell - 出售状态
+    {Number} platform - platform account
+    {String} advertising_aid - advertising id
+    {String} description - Ad slot description
+    {Number} unit_price - Unit time price
+    {Number} unit_time - Unit of time
+    {Boolean} on_sell - State of sale
 
-  请求示例：
+  Request example：
 
     localhost:3000/api/v2/advertising
 
-  返回结果：
+  Returned result：
 
 ```
 {
 }
 ```
 
-##### 3.3 @TODO 购买广告位
+##### 3.3 @TODO Buying an ad slot
+  Request type：POST
 
-  请求类型：POST
-
-  请求路径：/advertising/buy
-  {Object} cipher - 请求对象密文对象
+  Request path：/advertising/buy
+  {Object} cipher - Request object ciphertext object
   
   {
-    ct, - 密文文本 16进制
-    iv, - 向量 16进制
-    s   - salt 16进制
+    ct, - ciphertext hexadecimal
+    iv, - vector hexadecimal
+    s   - salt hexadecimal
   }
 
-  请求对象结构:
+  Request object structure:
 
-    {Number} account - 账户的id或名字
-    {Number} platform - 平台账号
-    {String} advertising_aid - 广告id
-    {Number} start_time - 开始时间
-    {Number} buy_number - 购买数目
-    {String} extra_data - 额外信息
-    {String} memo - 备注信息
+    {Number} account - account id or account name
+    {Number} platform - platform account
+    {String} advertising_aid - advertising id
+    {Number} start_time - starting time
+    {Number} buy_number - number of purchases
+    {String} extra_data - extra information
+    {String} memo - memo
 
-  请求示例：
+  Request example：
 
     localhost:3000/api/v2/advertising/buy
 
-  返回结果：
+  Returned results：
 
 ```
 {
 }
 ```
 
-##### 3.4 @TODO 确认广告位订单
+##### 3.4 @TODO Confirm Ad Order
+  Request type：POST
 
-  请求类型：POST
-
-  请求路径：/advertising/confirm
-  {Object} cipher - 请求对象密文对象
+  Request path：/advertising/confirm
+  {Object} cipher - Request object ciphertext object
   
   {
-    ct, - 密文文本 16进制
-    iv, - 向量 16进制
-    s   - salt 16进制
+    ct, - ciphertext hexadecimal
+    iv, - vector hexadecimal
+    s   - salt hexadecimal
   }
 
-  请求对象结构:
+  Request object structure:
 
-    {Number} platform - 平台账号
-    {String} advertising_aid - 广告id
-    {Number} advertising_order_oid - 广告位订单的id 
-    {Boolean} confirm - 确认或拒绝广告位订单
+    {Number} platform - platform account
+    {String} advertising_aid - advertising id
+    {Number} advertising_order_oid - ad slot order id
+    {Boolean} confirm - confirm or reject an ad slot order
 
-  请求示例：
+  Request example：
 
     localhost:3000/api/v2/advertising/confirm
 
-  返回结果：
+  Returned result：
 
 ```
 {
 }
 ```
 
-##### 3.5 @TODO 赎回广告位订单
+##### 3.5 @TODO Redeem ad slot order
+  Request type：POST
 
-  请求类型：POST
-
-  请求路径：/advertising/ransom
-  {Object} cipher - 请求对象密文对象
+  Request path：/advertising/ransom
+  {Object} cipher - Request object ciphertext object
   
   {
-    ct, - 密文文本 16进制
-    iv, - 向量 16进制
-    s   - salt 16进制
+    ct, - ciphertext hexadecimal
+    iv, - vector hexadecimal
+    s   - salt hexadecimal
   }
 
-  请求对象结构:
+  Request object structure:
 
-    {Number} from_account - 用户的id或名字
-    {Number} platform - 平台账号
-    {String} advertising_aid - 广告id
-    {Number} advertising_order_oid - 广告位订单的id 
+    {Number} from_account - user id or name
+    {Number} platform - platform account
+    {String} advertising_aid - advertising id
+    {Number} advertising_order_oid - ad slot order id 
 
-  请求示例：
+  Request example：
 
     localhost:3000/api/v2/advertising/ransom
 
-  返回结果：
+  Returned result：
 
 ```
 {
 }
 ```
 
-##### 3.6 @TODO 赎回广告位订单
+##### 3.6 @TODO Redeem ad slot order
+  Request type：POST
 
-  请求类型：POST
-
-  请求路径：/advertising/ransom
-  {Object} cipher - 请求对象密文对象
+  Request path：/advertising/ransom
+  {Object} cipher - Request object ciphertext object
   
   {
-    ct, - 密文文本 16进制
-    iv, - 向量 16进制
-    s   - salt 16进制
+    ct, - ciphertext hexadecimal
+    iv, - vector hexadecimal
+    s   - salt hexadecimal
   }
 
-  请求对象结构:
+  Request object structure:
 
-    {Number} from_account - 用户的id或名字
-    {Number} platform - 平台账号
-    {String} advertising_aid - 广告id
-    {Number} advertising_order_oid - 广告位订单的id 
+    {Number} from_account - user id or name
+    {Number} platform - platform account
+    {String} advertising_aid - advertising id
+    {Number} advertising_order_oid - ad slot order id 
 
-  请求示例：
+  Request example：
 
     localhost:3000/api/v2/advertising/ransom
 
-  返回结果：
+  Returned result：
 
 ```
 {
 }
 ```
 
-##### 3.7 @TODO 查询账户授予平台的权限
+##### 3.7 @TODO Query the permissions granted to the platform by the account
+  Request type：GET
 
-  请求类型：GET
+  Request path：/advertising
 
-  请求路径：/advertising
+  Request parameters：
 
-  请求参数：
-
-    {Number} platform - 平台账户
-    {String} lower_bound_advertising - 起始广告的id
-    {Number} limit - 返回结果数
+    {Number} platform - platform account
+    {String} lower_bound_advertising - initial advertising id
+    {Number} limit - number of results returned
  
-  请求示例：
+  Request example：
 
     localhost:3000/api/v2/advertising?platform=33136&lower_bound_advertising=0.0.0&limit=100
 
-  返回结果：
+  Returned result：
 
 ```
 {
@@ -845,214 +832,206 @@ http://localhost:3001/api/v2/advertising
 ```
 
 
-#### 4. 其他交易
+#### 4. Other transactions
+##### 4.1. Transfer
+  Request type：POST
 
-##### 4.1. 转账
+  Request path：/transfer
 
-  请求类型：POST
-
-  请求路径：/transfer
-
-  请求参数：
+  Request parameters：
 
 ```
- {Object} cipher - 请求的密文对象，格式如下
+ {Object} cipher - The request ciphertext object has the following format
 {
-  ct, - 密文文本 16进制
-  iv, - 向量 16进制
-  s   - salt 16进制
+  ct, - ciphertext hexadecimal
+  iv, - vector hexadecimal
+  s   - salt hexadecimal
 }
 ```
 
-请求对象结构:
+Request object structure:
 ```
-{Number} uid - 指定用户id
-{Number} amount - 转出金额
-{Number} asset_id - 资产id 
-{string} memo - 备注
-{Number} time - 操作时间
+{Number} uid - specified user id
+{Number} amount - transfer-out amount
+{Number} asset_id - asset id 
+{string} memo - memo
+{Number} time - operation time
 ```
-请求示例：参照 安全请求验证
+Request example: refer to security request verification
 
 ```
 localhost:3000/api/v2/transfer
 ```
 
- 返回结果：
+ Returned results：
 
 ```
 {
-  code: 操作结果,
-  message: 返回消息,
+  code: operation result,
+  message: return message,
   data: {
-    block_num: 操作所属块号
-    txid: 操作id
+    block_num: operation block number
+    txid: operation id
   }
 }
 ```
 
 
-#### 5. Auth 相关
+#### 5. Auth related
+##### 5.1. Signature platform sign
+  Request type：GET
 
-##### 5.1. 签名平台 sign
+  Request parameter：null
 
-  请求类型：GET
-
-  请求参数：无
-
-  请求示例：
+  Request example：
 
     localhost:3000/auth/sign
 
-  返回结果：
+  Returned results：
 
 ```
 {
-  code: 操作结果,
-  message: 返回消息,
+  code: operation result,
+  message: return message,
   data: {
-    sign: 签名结果,
-    time: 操作时间(毫秒值),
-    platform: 平台所有人id,
-    url: 钱包授权url
+    sign: signature result,
+    time: operation time (millisecond value),
+    platform:platform owner id,
+    url: wallet authorization url
   }
 }
 ```
 
-##### 5.2 签名验证 verify
+##### 5.2 Signature verification verify
+  Request type：GET
 
-  请求类型：GET
+  Request parameters：
 
-  请求参数：
+    {Number} yoyow - account id
+    {Number} time - operation time millisecond value
+    {String} sign - signature result
 
-    {Number} yoyow - 账号id
-    {Number} time - 操作时间毫秒值
-    {String} sign - 签名结果
-
-  请求示例：
+  Request example：
 
     localhost:3000/auth/verify?sign=20724e65c0d763a0cc99436ab79b95c02fbb3f352e3f9f749716b6dac84c1dc27e5e34ff8f0499ba7d94f1d14098c6a60f21f2a24a1597791d8f7dda47559c39a0&time=1517534429858&yoyow=217895094
 
-  返回结果：
+  Returned results：
 
     {
-      code: 操作结果,
-      message: 返回消息,
+      code: operation result,
+      message: return message,
       data: {
-        verify: 签名是否成功,
-        name: 签名的yoyow用户名
+        verify: Whether the signature is successful,
+        name: Signed yoyow username
       }
     }
 
-##### 5.3 签名平台 返回二维码 signQR
+##### 5.3 Signature Platform Return to QR code signQR
+  Request type：GET
 
-  请求类型：GET
+  Request parameters：
 
-  请求参数：
+    {String} state - The extended information will be sent to the platform together with the user signature information when the platform login interface is invoked. It is used when the platform login interface needs a customized parameter. If there is no such requirement, the information may not be transmitted.
 
-    {String} state - 拓展信息，将在调用平台登录接口时与用户签名信息一同发送到平台，用于平台登陆接口需要自定义的参数时使用，若无此需求可不传
-
-  请求示例：
+  Request example：
 
     localhost:3000/auth/signQR?state=platformCustomParams
 
-  返回结果：
+  Returned results：
 ```
 {
-  code: 操作结果,
-  message: 返回消息,
-  data: 二维码图片base64 字符串
+  code: operation result,
+  message: return message,
+  data: QR code image base64 string
 }
 ```
 
-##### 5.4 平台拓展信息协议说明
-
-平台属性 extra_data 拓展信息 JSON对象格式字符串 中
+##### 5.4 Platform Extension Information Protocol Description
+Platform property extra_data extension information JSON object format string
 ```javascript
 {
-    "login":"http://example/login" //平台扫码登录请求接口
-    "description":"平台说明"  //平台描述
-    "image":"http://example.image.jpg" //平台头像，yoyow app 1.1 中，显示的平台头像
-    "h5url":"http://exampleH5.com" //平台h5地址，用于在无app可跳转动情况下，跳转到h5页面
-    "packagename":"com.example.app" //平台android 跳转
-    "urlscheme":"example://"  //平台ios跳转
+    "login":"http://example/login" //platform code-scanning login request interface
+    "description":"platform description"  //platform description
+    "image":"http://example.image.jpg" //platform profile image, yoyow app 1.1, displayed platform profile image
+    "h5url":"http://exampleH5.com" //platform h5 address, used to jump to h5 page without app jumping
+    "packagename":"com.example.app" //platform android jump
+    "urlscheme":"example://"  //platform ios jump
 }
 ```
 
-##### 5.5 平台扫码登录
-
-App扫码授权登录将访问 平台拓展信息的 平台扫码登录请求接口 ，发送回用户签名对象
+##### 5.5 Platform login by scanning code
+App code-scanning authorized login will access the platform code-scanning login request interface of the platform extended information, and send back the user signature object.
 
 ```
 {
-  {Number} yoyow - 当前操作用户账号id
-  {String} time - 签名时间戳字符串
-  {String} sign - 签名字符串
-  {String} state - 平台签名时传入的自定义信息 (参考 Auth 相关 4.3 - signQR)
+  {Number} yoyow - Current operation user account id
+  {String} time - Signature timestamp string
+  {String} sign - Signature string
+  {String} state - Custom information passed in when the platform signed (Refer to Auth Related 4.3 - signQR)
 }
 ```
 
-约定 平台提供的接口必须返回以下信息
-```
+The interface provided by the platform must return the following information```
 {
-  {Number} code - 操作结果 0 为通过 任何非 0 情况视为错误处理
-  {String} message - 操作结果描述
+  {Number} code - If operation result is 0, it passed; any non-zero case is treated as an error.
+  
+  {String} message - operation result description
 }
 ```
 
-### 请求返回 error code 状态说明
+### Request to return error code status description
 
 ```
-1001 无效的签名类型
+1001 Invalid signature type
 
-1002 无效的签名时间
+1002 Invalid signature time
 
-1003 请求已过期
+1003 Request has expired
 
-1004 无效的操作时间
+1004 Invalid operation time
 
-1005 无效的操作签名
+1005 Invalid operation signature
 
-1006 账号信息与链上不匹配（常见于私钥恢复之后，使用其他电脑的本地数据或旧的备份文件进行授权操作导致）
+1006 The account information does not match the chain (usually after the private key is restored, using the local data of other computers or the old backup file for authorization operation)
 
-1007 未授权该平台
+1007 Unauthorized platform
 
-2000 api底层异常
+2000 Api underlying exception
 
-2001 账号不存在
+2001 Account does not exist
 
-2002 无效的账号
+2002 Invalid account
 
-2003 无效的转账金额
+2003 Invalid transfer amount
 
-2004 零钱和积分不足支付操作手续费
+2004 Insufficient tippings and points to pay fees
 
-2005 零钱不足
+2005 Insufficient tippings
 
-2006 无效的资产符号或id
+2006 Invalid asset symbol or id
 
-3001 文章ID必须为该平台该发文人的上一篇文章ID +1（平台管理发文id）
+3001 The post ID must be the platform poster's last post ID +1 (platform manages the id)
 ```
 
-### 安全请求验证
+### Security request verification
 
-涉及到资金安全相关的操作，比如转账，发文等各种写操作，会在中间件服务中验证其有效性。这类请求的信息需要先通过加密操作转换成密文，再发送给中间件服务。加密方式采用对称加密AES，密钥为配置文件中的`secure_key`。
+In terms of financial security-related operations, such as transfer, posting, and other write operations, its effectiveness will be verified in the middleware service. The information of such requests needs to be converted into ciphertext by encryption and then sent to the middleware service. The encryption method uses symmetric encryption AES, and the key is `secure_key` in the configuration file.
 
 
+Encryption example (crypto-js version of javascript, other languages use similar AES encryption)
 
-加密示例(javascript的 crypto-js 版，其他语言使用类似的AES加密方式)
+The default is mode CBC , padding scheme Pkcs7
 
-默认 mode CBC , padding scheme Pkcs7
-
-例如：transfer操作
+For example: transfer operation
 ```javascript
-    let key = 'customkey123456'; // 此key与中间件中的config 里 secure_key相同
+    let key = 'customkey123456'; // This key is the same as the secure_key in the config in the middleware.
 
     let sendObj = {
       "uid": 9638251,
       "amount": 100,
       "memo": "hello yoyow",
-      "time": Date.now()  //time 字段 操作时间取当前时间毫秒值 加密操作须带有此字段 用于验证操作时效
+      "time": Date.now()  //time field 
+      The operation time takes the current time millisecond value. Encryption must have this field for verifying the operation time
     }
 
     let cipher = CryptoJS.AES.encrypt(JSON.stringify(sendObj), key);
@@ -1070,7 +1049,7 @@ App扫码授权登录将访问 平台拓展信息的 平台扫码登录请求接
       }
     })
 ```
-PHP加密方式
+PHP encryption
 ```php
     function cryptoJsAesEncrypt($passphrase, $value){
       $salt = openssl_random_pseudo_bytes(8);
@@ -1089,5 +1068,5 @@ PHP加密方式
 ```
 
 
-其他需要安全请求验证的操作根据文档改动sendObj
+Other operations that require secure request verification change sendObj according to the documentation
 
