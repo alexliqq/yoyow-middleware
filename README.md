@@ -1,6 +1,6 @@
 # yoyow-middleware
 
-Using YOYOW middleware is the easiest way to access the platform. It mainly provides three interfaces: account authorization, platform incentives and content chaining. You can use Docker one-click deployment to get the corresponding API to easily interact with the YOYOW blockchain.
+Using YOYOW middleware is the easiest way to access the platform. It mainly provides three interfaces: account authorization, content/platform incentives and content posting. You can use Docker one-click deployment to get the corresponding APIs to easily interact with the YOYOW blockchain.
 
 YOYOW middleware communicates with YOYOW network through the API interface of YOYOW node, which provides platform service providers with convenient interfaces to access the data on the chain, ensuring that traditional business codes can reach the requirements of getting on chain with only minimal changes. The specific diagram is as follow:
 
@@ -49,9 +49,9 @@ The path to the configuration file is in the `conf/config.js` file in the code p
 ```
 Notes:
 
-1. In the general usage scenario, the middleware value needs to use the secondary key and the memo key at most, and the secondary key and the memo key can satisfy most of the requirements. Do not write the active key into the configuration file unless you are sure you need to use the active key.
+1. In the general usage scenario, the middleware suggests  to use the secondary key and the memo key at most, and the secondary key and the memo key can satisfy most of the requirements. Do not input the active key into the configuration file unless you are sure you need to use the active key.
 2. Encryption requests (`secure_key`) are used in the middleware to ensure security. However, it is strongly recommended to deploy the internal network, isolate it, and ensure the security of the private key.
-3. It is recommended to use the point deduction for the handling fees. If the deduction fails, it will directly report the error and will not automatically deduct the tippings as the handling fees.
+3. It is recommended to use the point to deduct for the handling fees. If the deduction fails, it will directly report the error and will not automatically deduct the tippings as the handling fees.
 
 ### Docker One-click Deployment
 
@@ -318,7 +318,7 @@ http://localhost:3001/api/v2/blocks/100/confirmed
 
 #### 
 
-#### 2. Post related interface
+#### 2. Post related APIs
 ##### 2.1. Query posts
   Request type：GET
 
@@ -618,7 +618,7 @@ localhost:3000/api/v2/posts/reward-proxy
 }
 ```
 
-#### 3. @TODO Advertising Related
+#### 3. @TODO  Advertising Related APIs
 
 ##### 3.1. @TODO Publishing an ad slot
   Request type：POST
@@ -959,8 +959,8 @@ Platform property extra_data extension information JSON object format string
 }
 ```
 
-##### 5.5 Platform login by scanning code
-App code-scanning authorized login will access the platform code-scanning login request interface of the platform extended information, and send back the user signature object.
+##### 5.5 Platform login by scanning QR code
+App QR code-scanning authorized login will access the platform code-scanning login request interface of the platform extended information, and send back the user signature object.
 
 ```
 {
